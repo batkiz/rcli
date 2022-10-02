@@ -3,8 +3,17 @@
 set windows-shell := ["powershell.exe", "-c"]
 set shell := ["bash"]
 
-build:
+set dotenv-load
+
+fmt:
+    go fmt
+
+lint: fmt
+    golangci-lint run
+
+build: lint
     go build
 
-lint:
-    golangci-lint run
+dev: fmt
+    go build
+

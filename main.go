@@ -1,5 +1,7 @@
 package main
 
+//go:generate go run data/generate.go > const.go
+
 import (
 	"context"
 	"fmt"
@@ -42,9 +44,9 @@ func main() {
 
 func repl() {
 	l, err := readline.NewEx(&readline.Config{
-		Prompt:      conf.Prompt(),
-		HistoryFile: "/tmp/readline.tmp",
-		//AutoComplete:    completer,
+		Prompt:          conf.Prompt(),
+		HistoryFile:     "/tmp/readline.tmp",
+		AutoComplete:    completer,
 		InterruptPrompt: "^C",
 		EOFPrompt:       "exit",
 
@@ -75,13 +77,12 @@ func repl() {
 		switch {
 		case line == "":
 			continue
-		case line == "d":
-			res := confirm(l)
-			fmt.Println(res)
 		case line == "exit":
 			goto exit
 		default:
-			execCmd(line)
+			if confirm(l, line) {
+				execCmd(line)
+			}
 		}
 	}
 exit:
@@ -119,9 +120,20 @@ func redisDo(ctx context.Context, cli *redis.Client, cmd []any) {
 	}
 }
 
-func confirm(l *readline.Instance) bool {
+func confirm(l *readline.Instance, line string) bool {
 	defer l.SetPrompt(l.Config.Prompt)
-	l.SetPrompt("danger![y/n]")
+
+	cmdAry := strings.Split(line, " ")
+	cmd := strings.ToUpper(cmdAry[0])
+
+	msg, ok := dangerousCommands[cmd]
+	if !ok {
+		return true
+	}
+
+	alert := msg + " [y/n]"
+
+	l.SetPrompt(alert)
 	line, err := l.Readline()
 	if err != nil {
 		log.Println(err)
