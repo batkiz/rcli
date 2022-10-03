@@ -35,6 +35,7 @@ var (
 	tmpl string
 )
 
+// 生成危险命令的提示
 func genDangerCommands() string {
 	var commands []DangerousCommand
 	if err := csvutil.Unmarshal(dangerousCommandsCsv, &commands); err != nil {
@@ -44,12 +45,13 @@ func genDangerCommands() string {
 	res := strings.Builder{}
 
 	for _, cmd := range commands {
-		res.WriteString(fmt.Sprintf("\t\"%s\": \"%s\",\n", cmd.Command, cmd.Reason))
+		res.WriteString(fmt.Sprintf("\"%s\": \"%s\",\n", cmd.Command, cmd.Reason))
 	}
 
-	return strings.TrimRight(res.String(), "\n")
+	return res.String()
 }
 
+// 生成命令的补全
 func genCommands() string {
 	var commands []Command
 	if err := csvutil.Unmarshal(commandSyntaxCsv, &commands); err != nil {
@@ -77,34 +79,34 @@ func genCommands() string {
 
 	// 大写
 	for _, s := range SingleCmd {
-		res.WriteString(fmt.Sprintf("\treadline.PcItem(\"%s\"),\n", s))
+		res.WriteString(fmt.Sprintf("readline.PcItem(\"%s\"),\n", s))
 	}
 	//	小写
 	for _, s := range SingleCmd {
-		res.WriteString(fmt.Sprintf("\treadline.PcItem(\"%s\"),\n", strings.ToLower(s)))
+		res.WriteString(fmt.Sprintf("readline.PcItem(\"%s\"),\n", strings.ToLower(s)))
 	}
 
 	// 大写
 	for k, v := range MultiCmd {
-		res.WriteString("\treadline.PcItem(\n")
-		res.WriteString(fmt.Sprintf("\t\t\"%s\",\n", k))
+		res.WriteString("readline.PcItem(\n")
+		res.WriteString(fmt.Sprintf("\"%s\",\n", k))
 		for _, s := range v {
-			res.WriteString(fmt.Sprintf("\t\treadline.PcItem(\"%s\"),\n", s))
+			res.WriteString(fmt.Sprintf("readline.PcItem(\"%s\"),\n", s))
 		}
-		res.WriteString("\t),\n")
+		res.WriteString("),\n")
 	}
 
 	// 小写
 	for k, v := range MultiCmd {
-		res.WriteString("\treadline.PcItem(\n")
-		res.WriteString(fmt.Sprintf("\t\t\"%s\",\n", strings.ToLower(k)))
+		res.WriteString("readline.PcItem(\n")
+		res.WriteString(fmt.Sprintf("\"%s\",\n", strings.ToLower(k)))
 		for _, s := range v {
-			res.WriteString(fmt.Sprintf("\t\treadline.PcItem(\"%s\"),\n", strings.ToLower(s)))
+			res.WriteString(fmt.Sprintf("readline.PcItem(\"%s\"),\n", strings.ToLower(s)))
 		}
-		res.WriteString("\t),\n")
+		res.WriteString("),\n")
 	}
 
-	return strings.TrimRight(res.String(), "\n")
+	return res.String()
 }
 
 type TmplData struct {

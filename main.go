@@ -88,32 +88,33 @@ func repl() {
 exit:
 }
 
-func toAnySlice[T any](ary []T) []any {
-	anyAry := make([]any, 0, len(ary))
-	for _, v := range ary {
-		anyAry = append(anyAry, v)
-	}
-	return anyAry
-}
-
 func execCmd(cmd string) {
-	ary := toAnySlice(strings.Split(cmd, " "))
-	redisDo(ctx, rdb, ary)
+	//ary := toAnySlice(strings.Split(cmd, " "))
+	redisDo(ctx, rdb, cmd)
 }
 
-func redisDo(ctx context.Context, cli *redis.Client, cmd []any) {
-	val, err := cli.Do(ctx, cmd...).Result()
+func redisDo(ctx context.Context, cli *redis.Client, cmd string) {
+	cmdAry := toAnySlice(strings.Split(cmd, " "))
+	val, err := cli.Do(ctx, cmdAry...).Result()
+
 	if err != nil {
 		log.Println(err)
 	} else {
-		switch val.(type) {
-		case []any:
-			ary := val.([]any)
-			for i, v := range ary {
-				fmt.Printf("%d) \"%v\"\n", i+1, v)
-			}
-		case int:
-			fmt.Printf("%d", val)
+		if val == nil {
+			fmt.Println("nil")
+		}
+
+		switch {
+		case matchCommand(cmd, "get"):
+			renderBulkString(val)
+		case matchCommand(cmd, "set"):
+			renderSimpleString(val)
+		case matchCommand(cmd, "info"):
+			renderBulkStringDecode(val)
+		case matchCommand(cmd, "hgetall"):
+			renderHashPairs(val)
+		case matchCommand(cmd, "memory help"):
+			renderHelp(val)
 		default:
 			fmt.Printf("\"%v\"\n", val)
 		}

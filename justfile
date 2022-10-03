@@ -8,7 +8,9 @@ set dotenv-load
 fmt:
     go fmt
 
-lint: fmt
+lint:
+    go mod tidy
+    just fmt
     golangci-lint run
 
 build: lint
