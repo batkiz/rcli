@@ -5,6 +5,8 @@ go 1.19
 require (
 	github.com/chzyer/readline v1.5.1
 	github.com/go-redis/redis/v8 v8.11.5
+	github.com/gookit/color v1.5.2
+	github.com/jszwec/csvutil v1.7.1
 	github.com/spf13/cobra v1.5.0
 )
 
@@ -13,6 +15,7 @@ require (
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/xo/terminfo v0.0.0-20210125001918-ca9a967f8778 // indirect
 	golang.org/x/sys v0.0.0-20220811171246-fbc7d0a398ab // indirect
 	golang.org/x/text v0.3.7 // indirect
 )

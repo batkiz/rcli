@@ -1,5 +1,7 @@
 package main
 
+//go:generate go run data/generate.go > const.go
+
 import (
 	"context"
 	"fmt"
@@ -42,9 +44,9 @@ func main() {
 
 func repl() {
 	l, err := readline.NewEx(&readline.Config{
-		Prompt:      conf.Prompt(),
-		HistoryFile: "/tmp/readline.tmp",
-		//AutoComplete:    completer,
+		Prompt:          conf.Prompt(),
+		HistoryFile:     "/tmp/readline.tmp",
+		AutoComplete:    completer,
 		InterruptPrompt: "^C",
 		EOFPrompt:       "exit",
 
@@ -75,53 +77,67 @@ func repl() {
 		switch {
 		case line == "":
 			continue
-		case line == "d":
-			res := confirm(l)
-			fmt.Println(res)
 		case line == "exit":
 			goto exit
 		default:
-			execCmd(line)
+			if confirm(l, line) {
+				execCmd(line)
+			}
 		}
 	}
 exit:
 }
 
-func toAnySlice[T any](ary []T) []any {
-	anyAry := make([]any, 0, len(ary))
-	for _, v := range ary {
-		anyAry = append(anyAry, v)
-	}
-	return anyAry
-}
-
 func execCmd(cmd string) {
-	ary := toAnySlice(strings.Split(cmd, " "))
-	redisDo(ctx, rdb, ary)
+	//ary := toAnySlice(strings.Split(cmd, " "))
+	redisDo(ctx, rdb, cmd)
 }
 
-func redisDo(ctx context.Context, cli *redis.Client, cmd []any) {
-	val, err := cli.Do(ctx, cmd...).Result()
+func redisDo(ctx context.Context, cli *redis.Client, cmd string) {
+	cmdAry := stringToArgsSlice(cmd)
+	val, err := cli.Do(ctx, cmdAry...).Result()
+
 	if err != nil {
 		log.Println(err)
 	} else {
-		switch val.(type) {
-		case []any:
-			ary := val.([]any)
-			for i, v := range ary {
-				fmt.Printf("%d) \"%v\"\n", i+1, v)
-			}
-		case int:
-			fmt.Printf("%d", val)
+		if val == nil {
+			fmt.Println("nil")
+		}
+
+		switch {
+		case matchCommand(cmd, "get"):
+			renderBulkString(val)
+		case matchCommand(cmd, "set"):
+			renderSimpleString(val)
+		case matchCommand(cmd, "info"):
+			renderBulkStringDecode(val)
+		case matchCommand(cmd, "hgetall"):
+			renderHashPairs(val)
+		case matchCommand(cmd, "memory help"):
+			renderHelp(val)
+		case matchCommand(cmd, "zrange"):
+			log.Println("here!")
+			renderMembers(val)
 		default:
 			fmt.Printf("\"%v\"\n", val)
 		}
 	}
 }
 
-func confirm(l *readline.Instance) bool {
+func confirm(l *readline.Instance, line string) bool {
 	defer l.SetPrompt(l.Config.Prompt)
-	l.SetPrompt("danger![y/n]")
+
+	cmdAry := strings.Split(line, " ")
+	cmd := strings.ToUpper(cmdAry[0])
+
+	msg, ok := dangerousCommands[cmd]
+	if !ok {
+		return true
+	}
+
+	alert := msg + " [y/n]"
+
+	l.SetPrompt(alert)
 	line, err := l.Readline()
 	if err != nil {
 		log.Println(err)
