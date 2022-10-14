@@ -20,7 +20,7 @@ var (
 	renderList = func(val any) {
 		ary := val.([]any)
 		for i, v := range ary {
-			fmt.Printf("%d) \"%v\"\n", i+1, v)
+			fmt.Printf("%d) \"%v\"\n", i+1, replaceQuotes(anyToString(v)))
 		}
 	}
 
@@ -120,6 +120,11 @@ var (
 	}
 
 	renderMembers = func(val any) {
+		resp := anyToString(val)
+		resp = strings.Trim(resp, "[]")
 
+		for i, v := range strings.Split(resp, " ") {
+			fmt.Printf("%d) \"%v\"\n", i+1, replaceQuotes(v))
+		}
 	}
 )

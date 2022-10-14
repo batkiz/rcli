@@ -94,7 +94,7 @@ func execCmd(cmd string) {
 }
 
 func redisDo(ctx context.Context, cli *redis.Client, cmd string) {
-	cmdAry := toAnySlice(strings.Split(cmd, " "))
+	cmdAry := stringToArgsSlice(cmd)
 	val, err := cli.Do(ctx, cmdAry...).Result()
 
 	if err != nil {
@@ -115,6 +115,9 @@ func redisDo(ctx context.Context, cli *redis.Client, cmd string) {
 			renderHashPairs(val)
 		case matchCommand(cmd, "memory help"):
 			renderHelp(val)
+		case matchCommand(cmd, "zrange"):
+			log.Println("here!")
+			renderMembers(val)
 		default:
 			fmt.Printf("\"%v\"\n", val)
 		}

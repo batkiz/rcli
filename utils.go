@@ -34,5 +34,19 @@ func doubleQuotes(s string) string {
 }
 
 func matchCommand(s, cmd string) bool {
-	return strings.HasSuffix(strings.ToLower(s), cmd)
+	return strings.HasPrefix(strings.ToLower(s), cmd)
+}
+
+func stringToArgsSlice(cmd string) []any {
+	ary := strings.Split(cmd, " ")
+	args := make([]any, 0, len(ary))
+	for _, s := range ary {
+		args = append(args, strings.Trim(s, `"'`))
+	}
+
+	return args
+}
+
+func replaceQuotes(s string) string {
+	return strings.ReplaceAll(s, `"`, `\"`)
 }
