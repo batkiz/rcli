@@ -107,7 +107,8 @@ var (
 	}
 
 	renderBytes = func(val any) {
-
+		v := val.(string)
+		fmt.Printf("%s\n", strings.TrimSpace(v))
 	}
 
 	renderUnixtime = func(val any) {
