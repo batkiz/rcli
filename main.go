@@ -116,8 +116,13 @@ func redisDo(ctx context.Context, cli *redis.Client, cmd string) {
 		case matchCommand(cmd, "memory help"):
 			renderHelp(val)
 		case matchCommand(cmd, "zrange"):
-			log.Println("here!")
 			renderMembers(val)
+		case matchCommand(cmd, "time"):
+			renderTime(val)
+		case matchCommand(cmd, "lastsave"):
+			renderUnixtime(val)
+		case matchCommand(cmd, "lolwut"):
+			renderBytes(val)
 		default:
 			fmt.Printf("\"%v\"\n", val)
 		}

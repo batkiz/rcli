@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"github.com/gookit/color"
 	"go/types"
+	"log"
+	"strconv"
 	"strings"
+	"time"
 )
 
 var (
@@ -104,11 +107,16 @@ var (
 	}
 
 	renderBytes = func(val any) {
-
+		v := val.(string)
+		fmt.Printf("%s\n", strings.TrimSpace(v))
 	}
 
 	renderUnixtime = func(val any) {
+		uts := val.(int64)
+		tm := time.Unix(uts, 0)
 
+		fmt.Printf("(integer) %d\n", uts)
+		fmt.Printf("(local time) %s\n", tm.Format("2006-01-02 15:04:05"))
 	}
 
 	renderSlowlog = func(val any) {
@@ -116,7 +124,19 @@ var (
 	}
 
 	renderTime = func(val any) {
+		ary := val.([]any)
+		unixts, ms := ary[0].(string), ary[1].(string)
+		unixTimeStamp, err := strconv.ParseInt(unixts, 10, 64)
+		if err != nil {
+			log.Println(err)
+			return
+		}
 
+		tm := time.Unix(unixTimeStamp, 0)
+
+		fmt.Printf("(unix timestamp) %s\n", unixts)
+		fmt.Printf("(millisecond) %s\n", ms)
+		fmt.Printf("(convert to local timezone) %s.%s\n", tm.Format("2006-01-02 15:04:05"), ms)
 	}
 
 	renderMembers = func(val any) {
