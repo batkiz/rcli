@@ -119,6 +119,8 @@ func redisDo(ctx context.Context, cli *redis.Client, cmd string) {
 			renderMembers(val)
 		case matchCommand(cmd, "time"):
 			renderTime(val)
+		case matchCommand(cmd, "lastsave"):
+			renderUnixtime(val)
 		default:
 			fmt.Printf("\"%v\"\n", val)
 		}

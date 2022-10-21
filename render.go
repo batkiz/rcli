@@ -111,7 +111,11 @@ var (
 	}
 
 	renderUnixtime = func(val any) {
+		uts := val.(int64)
+		tm := time.Unix(uts, 0)
 
+		fmt.Printf("(integer) %d\n", uts)
+		fmt.Printf("(local time) %s\n", tm.Format("2006-01-02 15:04:05"))
 	}
 
 	renderSlowlog = func(val any) {
@@ -131,7 +135,7 @@ var (
 
 		fmt.Printf("(unix timestamp) %s\n", unixts)
 		fmt.Printf("(millisecond) %s\n", ms)
-		fmt.Printf("(convert to local timezone) %v.%s\n", tm.Format("2006-01-02 15:04:05"), ms)
+		fmt.Printf("(convert to local timezone) %s.%s\n", tm.Format("2006-01-02 15:04:05"), ms)
 	}
 
 	renderMembers = func(val any) {
