@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/gookit/color"
 	"go/types"
@@ -11,6 +12,37 @@ import (
 )
 
 var (
+	rendCmdResp = func(cmd string, val any) {
+		if val == nil {
+			fmt.Println("nil")
+		}
+
+		switch {
+		case matchCommand(cmd, "get"):
+			renderBulkString(val)
+		case matchCommand(cmd, "set"):
+			renderSimpleString(val)
+		case matchCommand(cmd, "info"):
+			renderBulkStringDecode(val)
+		case matchCommand(cmd, "hgetall"):
+			renderHashPairs(val)
+		case matchCommand(cmd, "memory help"):
+			renderHelp(val)
+		case matchCommand(cmd, "zrange"):
+			renderMembers(val)
+		case matchCommand(cmd, "time"):
+			renderTime(val)
+		case matchCommand(cmd, "lastsave"):
+			renderUnixtime(val)
+		case matchCommand(cmd, "lolwut"):
+			renderBytes(val)
+		case matchCommand(cmd, "config get"), matchCommand(cmd, "memory stats"):
+			renderNestedPair(val)
+		default:
+			fmt.Printf("\"%v\"\n", val)
+		}
+	}
+
 	renderSimpleString = func(val any) {
 		fmt.Printf("%v\n", val)
 	}
@@ -102,8 +134,11 @@ var (
 
 		fmt.Printf(sb.String())
 	}
-	renderNestedPair = func(val any) {
 
+	renderNestedPair = func(val any) {
+		ary := val.([]any)
+
+		renderPair(ary, 0)
 	}
 
 	renderBytes = func(val any) {
@@ -148,3 +183,27 @@ var (
 		}
 	}
 )
+
+func renderPair(pairs []any, indent int) {
+	var (
+		keys = make([]any, 0)
+		vals = make([]any, 0)
+	)
+
+	for i := 0; i < len(pairs); i += 2 {
+		keys = append(keys, pairs[i])
+		vals = append(vals, pairs[i+1])
+	}
+
+	for i, key := range keys {
+		fmt.Printf(string(bytes.Repeat([]byte("\t"), indent)))
+		fmt.Printf("%v: ", key)
+
+		if v, ok := vals[i].([]any); ok {
+			fmt.Printf("\n")
+			renderPair(v, indent+1)
+		} else {
+			fmt.Printf("%v\n", vals[i])
+		}
+	}
+}
