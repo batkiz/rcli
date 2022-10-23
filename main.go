@@ -100,32 +100,7 @@ func redisDo(ctx context.Context, cli *redis.Client, cmd string) {
 	if err != nil {
 		log.Println(err)
 	} else {
-		if val == nil {
-			fmt.Println("nil")
-		}
-
-		switch {
-		case matchCommand(cmd, "get"):
-			renderBulkString(val)
-		case matchCommand(cmd, "set"):
-			renderSimpleString(val)
-		case matchCommand(cmd, "info"):
-			renderBulkStringDecode(val)
-		case matchCommand(cmd, "hgetall"):
-			renderHashPairs(val)
-		case matchCommand(cmd, "memory help"):
-			renderHelp(val)
-		case matchCommand(cmd, "zrange"):
-			renderMembers(val)
-		case matchCommand(cmd, "time"):
-			renderTime(val)
-		case matchCommand(cmd, "lastsave"):
-			renderUnixtime(val)
-		case matchCommand(cmd, "lolwut"):
-			renderBytes(val)
-		default:
-			fmt.Printf("\"%v\"\n", val)
-		}
+		rendCmdResp(cmd, val)
 	}
 }
 
